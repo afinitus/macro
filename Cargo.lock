@@ -4584,6 +4584,7 @@ dependencies = [
  "futures",
  "harness_id",
  "harnesses",
+ "lazy-regex",
  "macro_env_var",
  "macro_event_broker",
  "macro_user_id",

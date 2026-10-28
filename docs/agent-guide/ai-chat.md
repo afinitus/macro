@@ -1813,8 +1813,11 @@ must stay hidden; subsequent live messages must still appear.
   A pending request shows one `Approval needed` card above the composer, with
   the command or affected file separate from the actions. The transcript does
   not repeat the pending request.
-  `Allow once` and `Deny` answer immediately; `More options` contains remembered
-  choices with the agent's full rule text. Channel Magic Chips expose the same
+  `Allow once`, `Always allow`, and `Deny` answer immediately; `Always allow`
+  shows the agent's rule text as its tooltip. `More options` holds any further
+  remembered choices with their full rule text. Native Herdr sessions (Claude
+  Code or Codex in herdr) offer `Always allow` for recognized approval
+  dialogs; see `crates/coding_agent_worker/README.md`. Channel Magic Chips expose the same
   approval card in place of their loading state, alongside existing questions.
   Only authenticated users with **Edit** or **Owner** session access may answer;
   bot, harness, and internal-service credentials cannot approve on their behalf.
