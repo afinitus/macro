@@ -157,6 +157,7 @@ export function createSplitRouter(options: SplitRouterOptions) {
     layoutSnapshot: layout.snapshot,
     restoreLayout: layout.restore,
     layoutHref: layout.href,
+    createPaneId: panes.createPaneId,
     activatePane: panes.activate,
     registerGuard: guards.register,
     settled: runner.settled,

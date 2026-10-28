@@ -1,5 +1,5 @@
 import { batch, untrack } from 'solid-js';
-import { changedPanes, type ChangedPane } from '../panes/diff';
+import { type ChangedPane, changedPanes } from '../panes/diff';
 import type { PaneId } from '../panes/types';
 import { encodePanes, formatLocation } from '../routes/codec';
 import type { SplitRoutesManifest } from '../routes/manifest';
