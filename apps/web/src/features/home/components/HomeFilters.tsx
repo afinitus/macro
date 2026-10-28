@@ -213,7 +213,7 @@ export function HomeFilterDropdown() {
   });
 
   return (
-    <div class="relative ml-auto shrink-0">
+    <div class="relative shrink-0">
       <ListFilterDropdown
         label="Filter Home"
         customTrigger={

@@ -535,6 +535,13 @@ switches the open details.
 Desktop event details stay inside the visible calendar grid, including Home
 previews and narrow splits. They overlap wide Day-view events when needed and
 shrink to fit the pane; long details scroll while the RSVP row stays visible.
+As in Google Calendar, the popover opens beside the event, aligned with its top,
+and switches only between the right and left side; when it doesn't fit below,
+it slides up to stay in the window instead of opening above the event. Sections
+that load after it opens (join requests, meeting notes) therefore never move it
+from below the event to above it. Check placement with an event low in a tall
+window, a short window, and a pending join request; the backend-free regression
+is `apps/web/src/features/calendar-view/browser-test/playwright.config.ts`.
 
 The `New event` composer (also opened by dragging a range on the grid) has an `Event kind`
 pill choosing between `Event` and `Out of office`. Picking `Out of office` hides the guests,
@@ -549,7 +556,9 @@ provider does not report the stored ones. Timed and all-day events use solid cal
 blocks with dark text on desktop and mobile. Unanswered and tentative invitations have
 lighter fills; declined events are desaturated and struck through. Month-view timed events
 keep their compact dot treatment. Out-of-office details show an `Out of office` line under
-the schedule.
+the schedule. The details' calendar row names the calendar the event is on. A primary
+calendar reads as its inbox address, as in the calendar pickers, because Outlook names an
+account's default calendar `Calendar`. Other calendars show their name.
 An event that Google carries on several of an account's calendars (a shared calendar's
 re-import of a member's own event, for example) renders as one chip, not one per calendar:
 the details popover's color square shows its calendars. The chip shows the title, color, and
@@ -614,8 +623,9 @@ guest copy stays a guest copy, marked `(you)` on that inbox's row alone, even wh
 another connected inbox organizes the event. An Outlook guest copy never offers `Add
 guests` (Outlook lets only the organizer change a meeting) and shows the same
 explanation; an Outlook organizer adds guests like a Google one. The organizer's row on an
-Outlook event shows `Accepted` and `Going?` has `Yes` pressed, as on Google, although
-Microsoft lists the organizer as not having answered.
+Outlook event shows `Accepted`, as on Google, although Microsoft lists the organizer as not
+having answered. Microsoft refuses an organizer's answer, so an Outlook organizer gets no
+`Going?` footer (`viewerCan.rsvp` is false), while a Google organizer listed as a guest does.
 A guest the organizer does not let modify the event (`viewerCan.editDetails` false while
 `viewerCan.rsvp` is true) opens an editor whose date/time, all-day, title, description,
 repeat, conferencing and location controls are disabled, each with the tooltip `Only the

@@ -56,7 +56,7 @@ construction. Browse them at `/app/component/ui` (Foundations → Controls).
 - **FE-64** Components own their state treatments: desktop Tabs share a flat rounded track with an inset selected pill;
   Button uses the semantic pressed fill for its variant. Mark action toggles with
   `aria-pressed`, and expansion triggers with `aria-expanded`. Do not restyle
-  buttons as tabs. The agent composer's Chat/Code switch remains
+  buttons as tabs. The agent composer's Auto/Chat/Code switch remains
   `Tabs variant="track"`, a flat pill sliding along the composer's tray. Keep all
   tab treatments flat: use borders and selected fills, not raised edges, gradients, or shadows.
 - **FE-65** Components own their touch treatment. Never branch on

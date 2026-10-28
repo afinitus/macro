@@ -85,6 +85,7 @@ import {
   updateCallTeamShare,
   useCallRecordQuery,
 } from '@queries/call/call';
+import { updateExternalChatPermissions } from '@queries/external-chats/share-permissions';
 import { updateInitiativeSharePermissions } from '@queries/initiative/share-permissions';
 import {
   fetchSharePermissions,
@@ -102,7 +103,6 @@ import {
 } from '@queries/storage/entity-mutations';
 import { updateFormSharePermissions } from '@queries/storage/forms';
 import { useCurrentTeamQuery } from '@queries/team/teams';
-import { updateWhatsappGroupPermissions } from '@queries/whatsapp-groups/share-permissions';
 import { cognitionApiServiceClient } from '@service-cognition/client';
 import {
   blockNameToItemType,
@@ -178,10 +178,10 @@ const isLinkSharingDisabledForItem = (itemType: ShareItemType): boolean =>
   itemType === 'crm_pipeline';
 
 /** Blocks, plus native entities that are shared without one. */
-type ShareBlockType = BlockName | BlockAlias | 'initiative' | 'whatsapp_group';
+type ShareBlockType = BlockName | BlockAlias | 'initiative' | 'external_chat';
 
 function shareUrl(type: ShareBlockType, id: string): string {
-  if (type === 'whatsapp_group')
+  if (type === 'external_chat')
     return buildSimpleEntityUrl({ type: 'external/whatsapp', id });
   if (type !== 'initiative') return buildSimpleEntityUrl({ type, id });
   return buildSimpleEntityUrl({
@@ -192,7 +192,7 @@ function shareUrl(type: ShareBlockType, id: string): string {
 
 /**
  * The levels a recipient can hold on an item: forms have no comments, and a
- * WhatsApp chat is read-only in Macro (sending follows WhatsApp membership).
+ * external chat is read-only in Macro (sending follows provider membership).
  */
 export function shareLevelsFor(
   itemType: ShareItemType,
@@ -202,7 +202,7 @@ export function shareLevelsFor(
   if (
     itemType === 'document' &&
     blockAlias &&
-    blockAlias !== 'whatsapp_group' &&
+    blockAlias !== 'external_chat' &&
     resolveBlockAlias(blockAlias) === 'md'
   ) {
     const levels: AccessLevel[] = ['view'];
@@ -210,7 +210,7 @@ export function shareLevelsFor(
     if (ENABLE_MARKDOWN_LIVE_COLLABORATION) levels.push('edit');
     return levels;
   }
-  if (itemType === 'whatsapp_group') return ['view'];
+  if (itemType === 'external_chat') return ['view'];
   return undefined;
 }
 
@@ -221,8 +221,8 @@ const SHARE_LINK_SUBTEXT =
 // they may forward. Their links don't grant access to recipients either, so
 // copying skips SHARE_LINK_SUBTEXT.
 const RESTRICTED_SHARE_DESCRIPTIONS: Partial<Record<ShareItemType, string>> = {
-  whatsapp_group:
-    'Only the owner can share access to this WhatsApp chat. Sending always requires your own connected WhatsApp account.',
+  external_chat:
+    'Only the owner can share access to this chat. Sending always requires your own connected account.',
   crm_pipeline:
     'Only editors can share this pipeline. You can copy a link for people who already have access.',
   agent_session:
@@ -261,8 +261,8 @@ function forwardTarget(
         `Could not share this ${blockAlias === 'pipeline' ? 'pipeline' : 'project'}`
       );
   };
-  if (blockAlias === 'whatsapp_group')
-    throw new Error('WhatsApp groups use direct people sharing');
+  if (blockAlias === 'external_chat')
+    throw new Error('External chats use direct people sharing');
   if (blockAlias === 'pipeline')
     return { blockId: id, blockName: blockAlias, prepareChannel };
   if (blockAlias !== 'initiative')
@@ -845,7 +845,7 @@ function MobileShareDrawer(props: MobileShareDrawerProps) {
           >
             <Show
               when={
-                props.itemType === 'whatsapp_group' &&
+                props.itemType === 'external_chat' &&
                 props.userPermissions === Permissions.OWNER
               }
               fallback={
@@ -858,7 +858,7 @@ function MobileShareDrawer(props: MobileShareDrawerProps) {
             >
               <DirectAccessInvite
                 source={props.requests}
-                description="Invite someone to read this conversation. Sending requires their own connected WhatsApp account."
+                description="Invite someone to read this conversation. Sending requires their own connected account."
               />
             </Show>
             <Show when={props.canForward}>
@@ -1096,7 +1096,7 @@ export function ShareModal(props: ShareModalProps) {
     props.itemType !== 'agent_session' &&
     props.itemType !== 'initiative' &&
     props.itemType !== 'crm_pipeline' &&
-    props.itemType !== 'whatsapp_group';
+    props.itemType !== 'external_chat';
   // Outside a block the dialog reads a cached query, which the Share trigger
   // warms on hover, so it opens with the roster already in hand.
   const queryClient = useQueryClient();
@@ -1185,7 +1185,7 @@ export function ShareModal(props: ShareModalProps) {
     props.userPermissions === Permissions.OWNER ||
     props.userPermissions === Permissions.CAN_EDIT;
   const canForward = () =>
-    props.itemType === 'whatsapp_group'
+    props.itemType === 'external_chat'
       ? false
       : props.itemType === 'crm_pipeline'
         ? canSharePipeline()
@@ -1201,13 +1201,13 @@ export function ShareModal(props: ShareModalProps) {
       ? Permissions.OWNER
       : userPermissions();
   const directSharingOwner = () =>
-    props.itemType === 'whatsapp_group' &&
+    props.itemType === 'external_chat' &&
     props.userPermissions === Permissions.OWNER;
   const editPermissionEnabled = () => {
     if (props.itemType === 'agent_session') return true;
     if (
       props.itemType === 'document' &&
-      props.blockAlias !== 'whatsapp_group' &&
+      props.blockAlias !== 'external_chat' &&
       resolveBlockAlias(props.blockAlias) === 'md'
     )
       return ENABLE_MARKDOWN_LIVE_COLLABORATION;
@@ -1283,9 +1283,9 @@ export function ShareModal(props: ShareModalProps) {
 
   const removeChannelAccess = createCallback(async (channelId: string) => {
     if (recipientPermissions() !== Permissions.OWNER) return;
-    // A WhatsApp chat reaches a channel only by mention; its owner revokes it.
-    if (props.itemType === 'whatsapp_group') {
-      const result = await updateWhatsappGroupPermissions(props.id, {
+    // An external chat reaches a channel only by mention; its owner revokes it.
+    if (props.itemType === 'external_chat') {
+      const result = await updateExternalChatPermissions(props.id, {
         channelSharePermissions: [{ operation: 'remove', channelId }],
       });
       if (result.isOk()) {
@@ -1457,7 +1457,7 @@ export function ShareModal(props: ShareModalProps) {
     ) => {
       if (
         recipientPermissions() !== Permissions.OWNER ||
-        props.itemType === 'whatsapp_group'
+        props.itemType === 'external_chat'
       )
         return;
 
@@ -1608,11 +1608,8 @@ export function ShareModal(props: ShareModalProps) {
         getTeamShareScope(sharePermission.teamShareAccessLevel) !== 'NONE';
 
       let result: Result<unknown, ResultError<any>[]>;
-      if (props.itemType === 'whatsapp_group') {
-        result = await updateWhatsappGroupPermissions(
-          props.id,
-          sharePermission
-        );
+      if (props.itemType === 'external_chat') {
+        result = await updateExternalChatPermissions(props.id, sharePermission);
       } else if (
         props.itemType !== 'call' &&
         usesGraphqlSharePolicy(props.itemType)
@@ -1727,11 +1724,8 @@ export function ShareModal(props: ShareModalProps) {
       const scope = getLinkShareScope(sharePermission.linkShare);
       let result: Result<any, ResultError<any>[]> | undefined;
 
-      if (props.itemType === 'whatsapp_group') {
-        result = await updateWhatsappGroupPermissions(
-          props.id,
-          sharePermission
-        );
+      if (props.itemType === 'external_chat') {
+        result = await updateExternalChatPermissions(props.id, sharePermission);
       } else if (usesGraphqlSharePolicy(props.itemType)) {
         result = await updateEntitySharePolicy(
           props.itemType,
@@ -1900,7 +1894,7 @@ export function ShareModal(props: ShareModalProps) {
                   <Show when={directSharingOwner()}>
                     <DirectAccessInvite
                       source={requests}
-                      description="Invite someone to read this conversation. Sending requires their own connected WhatsApp account."
+                      description="Invite someone to read this conversation. Sending requires their own connected account."
                     />
                   </Show>
                   <Show when={canForward()}>
@@ -2256,7 +2250,7 @@ export function ShareTrigger(props: {
 
   const itemType = (): ShareItemType => {
     const type = blockType();
-    return type === 'initiative' || type === 'whatsapp_group'
+    return type === 'initiative' || type === 'external_chat'
       ? type
       : blockNameToItemType(type);
   };

@@ -25,6 +25,8 @@ import type { Sdk as StorageSdk } from '../../generated/storage/sdk.gen';
 import type { Sdk as UnfurlSdk } from '../../generated/unfurl/sdk.gen';
 
 export const agentHarnessExcluded = [
+  'classify', // Command K inference is app-internal.
+  'extract', // Command K inference is app-internal.
   'loadAgentModelsHandler',
   'discoverAgentCapabilitiesHandler',
   'previewAgentSessions',
@@ -174,8 +176,10 @@ export const cognitionExcluded = [
   'healthHandler',
   'listMcpServers',
   'listPipedreamMcpConnections',
+  'listPipedreamMcpOverlays',
   'mcpAuthCallback',
   'mcpOauthClientMetadata',
+  'recoverPipedreamMcpConnection',
   'rejectToolCall',
   // Channel discovery shares the app-only import workflow below.
   'discoverHandler',
@@ -360,13 +364,6 @@ export const storageExcluded = [
   'jobProcessingResultHandler',
   'joinChannelByCode',
   'leaveOrEndCall',
-  // Pairing, passkey handoff, and rollout configuration belong to the app session.
-  'linkedCancelPairing',
-  'linkedConfiguration',
-  'linkedConnect',
-  'linkedDisconnect',
-  'linkedPairing',
-  'linkedPasskey',
   // Live meeting admission and participant previews are app session flows.
   'meetingGuestJoin',
   // Browser setup reserves an empty RTC room before creating a meeting.
@@ -394,6 +391,12 @@ export const storageExcluded = [
   'uploadFolderHandler',
   'upsertHistoryHandler',
   'upsertUserDocumentViewLocation',
+  // WhatsApp pairing, passkey handoff, and rollout configuration belong to the app session.
+  'whatsappCancelPairing',
+  'whatsappConnect',
+  'whatsappDisconnect',
+  'whatsappPairing',
+  'whatsappPasskey',
 ] as const satisfies readonly (keyof StorageSdk)[];
 
 export const storageBacklog =
