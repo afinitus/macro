@@ -62,7 +62,7 @@ function ComposerFooter(props: {
           </Button>
         </Show>
         <Button
-          variant="cta"
+          variant="primary"
           aria-label={action()}
           aria-keyshortcuts="Meta+Enter Control+Enter"
           size="lg"
