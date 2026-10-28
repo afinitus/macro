@@ -707,7 +707,7 @@ describe('send and schedule ordering', () => {
       state.handleSendTimeChange(new Date('2026-12-01T12:00:00Z'));
       await state.sendEmail();
       expect(composeContext.delivery.schedule).toHaveBeenCalledWith(
-        expect.objectContaining({ draftGeneration: 3 }),
+        expect.objectContaining({ draftGeneration: 3, isReply: true }),
         'inbox'
       );
       const scheduledNotice = vi

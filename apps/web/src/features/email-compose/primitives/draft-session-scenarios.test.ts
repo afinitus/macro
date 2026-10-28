@@ -514,6 +514,8 @@ describe.each(['reply', 'compose'] as const)(
             threadId: 'thread',
             sendTime: '2027-01-01T12:00:00.000Z',
             includeSignature: undefined,
+            reschedule: false,
+            isReply: surface === 'reply',
           },
           'inbox'
         );
