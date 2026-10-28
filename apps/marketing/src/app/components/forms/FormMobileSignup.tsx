@@ -178,7 +178,7 @@ export function FormMobileSignup(props: FormMobileSignupProps) {
           spellcheck={false}
           aria-label="Email address"
           aria-invalid={error() ? 'true' : undefined}
-          placeholder={props.placeholder ?? 'Your work email'}
+          placeholder={props.placeholder ?? 'Your work email or Gmail'}
           value={email()}
           onInput={(event) => {
             setEmail(event.currentTarget.value);
