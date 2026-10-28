@@ -143,23 +143,22 @@ unified diff with **Back to conversation**; returning preserves the unsent draft
 
 The mobile conversation list omits the desktop **Agents** and **Connections** controls. Use the Agents composer or global create menu to start
 a conversation. Returning to the list and reopening the composer preserves the
-draft, attachments, agent, model, repository, and branch. Tap the
-agent/model control once to open a bottom sheet with its search field focused,
-without first focusing or expanding the message input. Tap an agent to use its
-default model, or its model arrow to choose a model; **Create agent** opens the
-roster. Agents are clustered into **Built-in**, **Your agents**, and **Needs
-connection**, with runtime/model details below their names. Code opens directly
-on these groups without an empty Models section or an unrelated runtime warning.
+draft, attachments, agent, model, repository, and branch. The composer shows
+two icon buttons: the agent's icon and the model's logo. Tap the agent icon once
+to open a bottom sheet of agents, without first focusing or expanding the
+message input. Tap an agent to use its default model; **Create agent** opens the
+roster. Agents are clustered into **Built-in** (Macro first), **Your agents**,
+and **Needs connection**, with runtime/model details below their names. Tap the
+model logo to open the selected agent's model sheet with its search focused.
 **Create agent** uses the shared rounded pill button with a subtle fill at the
 bottom right at the end of the scrolling list. The picker uses one
 continuous surface, with labels and spacing separating groups instead of nested
 shaded cards. Provider sections use compact spacing, with labels close to their
-rows. Model lists start with
-**Suggested**, with Gemini last when available, followed by **More models** and your agents. **More models**
+rows. Model sheets start with
+**Suggested**, with Gemini last when available, followed by **More models**. **More models**
 opens the complete provider catalog, including copies of Suggested choices;
 use Back to return. Search accepts
-model names, IDs, and providers. When browsing an agent, **Use default** in the
-header selects its configured model.
+model names, IDs, and providers.
 
 The floating mobile composer appears only on **Agents**; Home and other views
 keep their New action or their own reply/comment composer.
@@ -434,23 +433,24 @@ the shimmer.
   row. Focusing a session input on a phone also expands it. Height changes animate
   over 200ms, with reduced-motion preferences respected. **Agent** and **Send**
   sit inside the input on the right.
-  Desktop model selectors always show the selected model name alongside the icon.
-  Saved and coding agents show their own icon and name plus the model name on desktop, without a
-  second model icon; phones use an icon-only picker. Routine configuration
-  keeps the saved model name visible in its picker, including unavailable models.
-- The agent dropdown includes saved agents of the selected mode regardless of
-  runtime, plus Cursor in Code mode.
-  Macro's models use the same searchable catalog as running sessions:
+  The composer has two controls: **Agent** shows the selected agent's icon and
+  name (Macro included), and **Model** beside it shows the effective model's
+  logo and name. Phones show both as icon-only buttons. Routine configuration
+  keeps the agent and saved model names visible, including unavailable models.
+- The agent dropdown lists only agents: Macro first under **Built-in**, then
+  saved agents of the selected mode regardless of runtime, plus Cursor in Code
+  mode. Choosing an agent uses its default model and clears any override.
+- The model control lists only the selected agent's harness models, from the
+  same searchable catalog as running sessions. For Macro:
   **Suggested** lists **Opus 5.5**, **Sonnet 5.5**, **GPT-5.6** (Sol in
   runtime catalogs), **GPT-6 Astra**, and **Gemini**, when available, in that order. The
   **More models** submenu contains the complete catalog grouped by provider,
-  including the Suggested choices and effort/speed variants. Your agents
-  follow Suggested and More models in the root menu. Choosing a model
+  including the Suggested choices and effort/speed variants. Choosing a model
   does not reorder the sections. Search matches names, IDs, and provider names. The compact borderless search
   field receives focus when the selector opens or reopens. Its opaque header
   meets the top of the scroll area so rows cannot show through above it.
-  **Built-in**, **Your agents**, and **Needs connection** groups follow when
-  they have entries. Each agent row shows its runtime and model, or its setup
+  In the agent dropdown, **Built-in**, **Your agents**, and **Needs connection**
+  groups appear when they have entries. Each agent row shows its runtime and model, or its setup
   action/availability reason. **Create agent** uses the shared rounded pill
   button at the bottom right with a subtle background. Models have readable
   names (for example, **Sonnet 5.5**) and provider or model icons aligned with the
@@ -461,26 +461,18 @@ the shimmer.
   open-weight models; and Google's **Gemini 3.8 Flash**. The Anthropic models
   are **Sonnet 5.5**, **Opus 5.5**, and **Haiku 4.5**; older Claude versions
   (Sonnet 5, Opus 5, Fable 5.1) are not offered.
-  Selecting a model here selects
-  the default runtime and applies that model to the next send, hiding the repository controls while keeping the mode bar visible.
-  A model chosen from that catalog is remembered in local storage as the
-  default for Macro's in-memory agent until another model entry is picked.
-  The built-in Macro agent is the only agent excluded from these sections; its models remain available.
+  A model chosen for Macro is remembered in local storage as the user's
+  default for Macro's in-memory agent until another model is picked; the
+  persona's saved default never changes.
   Unavailable paired agents stay visible with a reason.
-  If Macro is unavailable, its catalog stays searchable but
-  model choices are disabled in every list. Model discovery uses the
+  If the selected agent is unavailable, its model control is disabled. Model discovery uses the
   selected runtime. Every coding agent shows repository
   controls; chat agents hide those controls but keep the mode bar. Repository/branch overrides are currently applied
   only to Cursor sessions by the create-session API.
   The most recently used supported,
   available agent is selected initially; otherwise Macro is selected.
-  Hover an agent (or use the right arrow key) to open its model submenu, with
-  the searchable Settings catalog, provider icons, and scrollable provider sections.
-  The submenu focuses the `Search models` field so you can type immediately.
-  Clicking an agent directly, or pressing Enter/Space on its focused row, uses
-  its default and clears any previous model override. Right Arrow still opens
-  the model submenu; choosing a submenu model selects both the agent and that
-  model. Escape dismisses the picker and restores focus to its trigger.
+  Opening the model control focuses its `Search models` field so you can type
+  immediately. Escape dismisses either picker and restores focus to the input.
   A checkmark identifies the selected model,
   including when it is the agent’s configured default; there is no separate default row.
   Disconnected Cursor offers **Connect Cursor**, opening Settings → Agents → Runtimes.
@@ -541,8 +533,8 @@ the shimmer.
   and cannot be changed for local sessions. The native Claude/Codex TUI remains
   interactive in Herdr, and local turns appear in the Macro transcript.
 - Sending starts a session with the chosen agent's configured default model;
-  a model selected from its submenu overrides that default for the next send
-  only. Sending or choosing another agent clears the override. This does not
+  a model selected from the model control overrides that default for the next
+  send only (Macro keeps the remembered model described above). Sending or choosing another agent clears the override. This does not
   update the saved agent; configure persistent defaults in the agent editor.
   Within an existing session, the model picker remains available on the right.
   Its trigger, model options, and session metadata use the same readable model names
