@@ -73,7 +73,12 @@ impl ShortUuidConverter {
                 .char_map
                 .get(&c)
                 .ok_or_else(|| anyhow!("Invalid character in short UUID: {}", c))?;
-            num = num * self.base + digit;
+            // Checked: a long enough base58 string exceeds u128, which would
+            // panic in debug builds and silently wrap to the wrong UUID in release.
+            num = num
+                .checked_mul(self.base)
+                .and_then(|n| n.checked_add(*digit))
+                .ok_or_else(|| anyhow!("Short UUID out of range: {}", short_uuid))?;
         }
 
         // Convert number to bytes (16 bytes for UUID)

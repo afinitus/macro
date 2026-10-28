@@ -47,3 +47,18 @@ fn test_specific_conversion() {
         assert_eq!((uuid, converted_short.as_str()), (uuid, short));
     }
 }
+
+#[test]
+fn test_to_uuid_rejects_values_beyond_u128() {
+    let converter = ShortUuidConverter::default();
+
+    // The largest UUID still round-trips.
+    let max = Uuid::from_u128(u128::MAX);
+    let short = converter.from_uuid(&max);
+    assert_eq!(converter.to_uuid(&short).unwrap(), max);
+
+    // Passes `is_short_uuid` but encodes a number larger than u128::MAX.
+    let too_large = "Z".repeat(24);
+    assert!(converter.is_short_uuid(&too_large));
+    assert!(converter.to_uuid(&too_large).is_err());
+}
