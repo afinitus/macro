@@ -68,7 +68,7 @@ function GenerateActionMenu(props: GenerateMenuProps) {
     event.preventDefault();
     switch (event.key) {
       case 'ArrowUp':
-        setSelected((p) => Math.min(p - 1, 0));
+        setSelected((p) => Math.max(p - 1, 0));
         break;
       case 'ArrowDown':
         setSelected((p) => Math.min(p + 1, 1));
