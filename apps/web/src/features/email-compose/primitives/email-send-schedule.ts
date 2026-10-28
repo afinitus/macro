@@ -82,7 +82,6 @@ export function createEmailSendSchedule(options: {
   draftGeneration?: Accessor<number>;
   saveDraft: () => Promise<string | undefined>;
   threadId: Accessor<string | null | undefined>;
-  isReply?: boolean;
   /** Scheduling marks the thread done only when this reports it in the inbox. */
   threadInInbox?: Accessor<boolean | undefined>;
   inboxId: Accessor<string | undefined>;
@@ -372,8 +371,6 @@ export function createEmailSendSchedule(options: {
             threadId: options.threadId() ?? undefined,
             sendTime: requested.toISOString(),
             includeSignature: options.includeSignature(),
-            reschedule: action === 'update',
-            isReply: options.isReply ?? false,
           },
           inboxId
         );

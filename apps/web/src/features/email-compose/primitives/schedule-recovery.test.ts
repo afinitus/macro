@@ -163,37 +163,3 @@ it.each(['standalone', 'reply'] as const)(
     }
   }
 );
-
-it('tells delivery whether a submit is a new schedule or a reschedule', async () => {
-  const context = createComposeContext();
-  const { schedule, dispose } = createRoot((dispose) => ({
-    dispose,
-    schedule: createEmailSendSchedule({
-      delivery: context.delivery,
-      notices: context.notices,
-      draftId: () => 'draft',
-      threadId: () => 'thread',
-      isReply: true,
-      inboxId: () => 'inbox',
-      saveDraft: vi.fn(async () => 'draft'),
-      generation: () => 'one',
-      includeSignature: () => undefined,
-    }),
-  }));
-  try {
-    expect(schedule.select(new Date(sendTime))).toBe(true);
-    expect(await schedule.submit()).toBe('scheduled');
-    expect(schedule.select(new Date('2026-12-02T12:00:00Z'))).toBe(true);
-    expect(await schedule.submit()).toBe('updated');
-    expect(
-      vi
-        .mocked(context.delivery.schedule)
-        .mock.calls.map(([input]) => [input.reschedule, input.isReply])
-    ).toEqual([
-      [false, true],
-      [true, true],
-    ]);
-  } finally {
-    dispose();
-  }
-});

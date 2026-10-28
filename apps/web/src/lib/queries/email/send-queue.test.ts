@@ -128,12 +128,11 @@ it('counts each accepted send once for product analytics', async () => {
       ...draft,
       draftId: '00000000-0000-4000-8000-000000000004',
       replyingToId: '00000000-0000-4000-8000-000000000005',
-      sendTime: '2030-01-01T12:00:00Z',
     },
   });
   expect(mocks.track.mock.calls).toEqual([
-    ['email_message_sent', { scheduled: false, isReply: false }],
-    ['email_message_sent', { scheduled: true, isReply: true }],
+    ['email_message_sent', { isReply: false }],
+    ['email_message_sent', { isReply: true }],
   ]);
 });
 it('does not count a send the queue refused', async () => {

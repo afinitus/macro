@@ -254,9 +254,6 @@ export interface EmailDelivery {
       sendTime: string;
       draftGeneration?: number;
       includeSignature?: boolean;
-      /** Moves an existing schedule; only a new schedule counts as a send. */
-      reschedule?: boolean;
-      isReply?: boolean;
     },
     inboxId?: string
   ): Promise<void>;

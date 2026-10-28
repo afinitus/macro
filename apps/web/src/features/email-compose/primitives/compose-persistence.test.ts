@@ -425,8 +425,6 @@ it('only commits a selected time through the primary action', async () => {
       threadId: 'thread',
       sendTime: firstTime.toISOString(),
       includeSignature: undefined,
-      reschedule: false,
-      isReply: false,
     },
     'inbox'
   );

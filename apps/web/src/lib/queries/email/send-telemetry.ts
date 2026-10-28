@@ -92,10 +92,7 @@ export function recordEmailSend(
 }
 
 /** Product analytics for one accepted send: flags only, never content or addresses. */
-export function trackEmailMessageSent(properties: {
-  scheduled: boolean;
-  isReply: boolean;
-}): void {
+export function trackEmailMessageSent(properties: { isReply: boolean }): void {
   try {
     analytics.track('email_message_sent', properties);
   } catch (error) {

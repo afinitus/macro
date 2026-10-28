@@ -134,10 +134,7 @@ export async function sendEmailQueued(args: {
   );
   recordEmailSend({ operation: 'enqueue', outcome: 'queued' }, intent);
   // Every queued send passes here once, whichever surface started it.
-  trackEmailMessageSent({
-    scheduled: !!draft.sendTime,
-    isReply: draft.replyingToId != null,
-  });
+  trackEmailMessageSent({ isReply: draft.replyingToId != null });
   return {
     draftId: String(draft.draftId),
     threadId: draft.threadDbId,

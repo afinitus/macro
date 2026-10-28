@@ -80,7 +80,6 @@ import {
   sendEmailQueued,
   settledSendAttempt,
 } from '@queries/email/send-queue';
-import { trackEmailMessageSent } from '@queries/email/send-telemetry';
 import { serverEmailSends } from '@queries/email/server-sends';
 import {
   fetchAndCacheThread,
@@ -654,15 +653,7 @@ export function createEmailComposeContext(
         }
       },
       schedule: async (
-        {
-          draftId,
-          threadId,
-          sendTime,
-          includeSignature,
-          draftGeneration,
-          reschedule,
-          isReply,
-        },
+        { draftId, threadId, sendTime, includeSignature, draftGeneration },
         inboxId
       ) => {
         await requireSavedDraftForDelivery(draftId);
@@ -675,9 +666,6 @@ export function createEmailComposeContext(
           },
           headerId(inboxId)
         );
-        // Send Later bypasses the outbox, so it is counted here.
-        if (!reschedule)
-          trackEmailMessageSent({ scheduled: true, isReply: !!isReply });
         try {
           publishDraftLifecycleChange(draftId, inboxId);
           refreshThread(threadId);

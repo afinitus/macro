@@ -941,7 +941,6 @@ export function createReplyComposer(
     draftId: savedDraftId,
     saveDraft: saveForSchedule,
     threadId: savedDraftThreadId,
-    isReply: replyTarget?.db_id != null,
     threadInInbox: () => thread()?.inbox_visible,
     inboxId: activeInboxId,
     includeSignature: () => (includeSignature() ? undefined : false),

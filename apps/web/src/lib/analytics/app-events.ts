@@ -219,11 +219,10 @@ export type AppEvents = {
   plan_changed: { plan: 'premium' | 'max'; from?: string };
 
   /**
-   * An email the user sent, counted once when the send is accepted: queued in
-   * the outbox, or scheduled with Send Later (`scheduled`). Undo does not
-   * retract it. Older events have no properties.
+   * An email the user sent, counted once when the outbox accepts it. Undo
+   * does not retract it. Older events have no properties.
    */
-  email_message_sent: { scheduled: boolean; isReply: boolean };
+  email_message_sent: { isReply: boolean };
   /**
    * How the inbox-link OAuth callback ended. `connected` covers re-linking an
    * inbox that was already connected; the client cannot tell them apart.
