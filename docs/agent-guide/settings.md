@@ -360,7 +360,11 @@ only; without a team it is the only dropdown. A browser language the app isn't
 offered in falls back to English. Menus, navigation, the command and
 create menus, and settings navigation switch language as soon as the setting
 saves; page contents and user data stay as written. The choice is remembered on
-the device, so the next launch starts in the same language.
+the device, so the next launch starts in the same language. Once that resolved
+language has loaded, PostHog stores it on the person as `interface_language`
+(a tag such as `en` or `zh-Hans`). A usage pie is a Trends insight on
+`$pageview`, unique users, broken down by the person property
+`interface_language`.
 
 Existing settings URLs remain valid; `connections` still opens Integrations,
 `agent-connections` aliases Integrations, and `harness` aliases Runtimes.

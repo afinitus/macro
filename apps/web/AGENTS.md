@@ -344,6 +344,8 @@ the user's newest account for that app from the last fifteen minutes.
   with `t()` from `@app/lib/i18n`, adding only the English to
   `src/lib/i18n/locales/en/`. The periodic `update-translations` skill fills
   in the other languages. See the [i18n rule](../../.agents/rules/web/i18n.md).
+  The resolved interface language is reported to PostHog as the person
+  property `interface_language` when the account language loads.
 - When adding or changing a feature flag, follow the `feature-flags` skill.
 - When adding or changing a view's feature tour, follow the `add-tour` skill.
 
