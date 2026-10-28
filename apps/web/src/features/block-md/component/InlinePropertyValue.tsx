@@ -91,6 +91,7 @@ export const InlinePropertyValue: Component<InlinePropertyValueProps> = (
       hoverTrailingAction={
         <Show when={canManage()}>
           <Button
+            variant="ghost"
             size="icon-sm"
             aria-label="Unpin"
             disabled={removing()}
