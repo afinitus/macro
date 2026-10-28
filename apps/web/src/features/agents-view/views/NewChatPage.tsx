@@ -528,15 +528,9 @@ export function NewChatPage(props: {
         <div ref={tourTarget(AGENTS_TOUR.composer)} class="col">
           <div class="greeting">
             <ComposerGreeting wireframe={coding()}>
-              <Show when={mode()} keyed>
-                {(currentMode) => (
-                  <span class="greeting-text">
-                    {currentMode === 'code'
-                      ? 'What should we build?'
-                      : 'What should we work on?'}
-                  </span>
-                )}
-              </Show>
+              {mode() === 'code'
+                ? 'What should we build?'
+                : 'What should we work on?'}
             </ComposerGreeting>
           </div>
           <FloatRegionOrInline
