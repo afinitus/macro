@@ -104,6 +104,7 @@ vi.mock('../agents-view/queries/agent-roster-source', () => ({
             default_model: 'claude-sonnet-4-6',
           },
         ],
+        macroDefaultModel: 'claude-sonnet-4-6',
         runtimes: [],
         cursorConnected: false,
         cursorNeedsConnection: true,
@@ -174,41 +175,27 @@ function inputPrompt(value = 'Summarize updates'): HTMLTextAreaElement {
   return editor;
 }
 
-function openPicker(): void {
-  const trigger = screen.getByRole('button', { name: 'Agent' });
+async function choose(
+  control: 'Agent' | 'Model',
+  item: RegExp | string
+): Promise<void> {
+  const trigger = screen.getByRole('button', { name: control });
   trigger.focus();
   fireEvent.keyDown(trigger, { key: 'Enter' });
+  const row = screen.getByRole('menuitem', { name: item });
+  row.focus();
+  fireEvent.keyDown(row, { key: 'Enter' });
+  await waitFor(() =>
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+  );
 }
 
+/** Macro with a model, an agent on its default, or an agent with a model override. */
 async function selectTarget(
   target: 'model' | 'agent' | 'override'
 ): Promise<void> {
-  openPicker();
-  if (target === 'agent') {
-    fireEvent.click(screen.getByRole('menuitem', { name: /^Researcher/ }));
-  } else {
-    let menu: HTMLElement | undefined;
-    if (target === 'override') {
-      const row = screen.getByRole('menuitem', { name: /^Researcher/ });
-      row.focus();
-      fireEvent.keyDown(row, { key: 'ArrowRight' });
-      // Do not select the same model from the root Macro catalog.
-      menu = await screen.findByRole('menu', { name: /^Researcher/ });
-      await within(menu).findByRole('textbox', { name: 'Search models' });
-    }
-    const item = (menu ? within(menu) : screen).getByRole('menuitem', {
-      name: 'Custom model',
-    });
-    item.focus();
-    fireEvent.keyDown(item, { key: 'Enter' });
-  }
-  await waitFor(() =>
-    expect(
-      screen
-        .getByRole('button', { name: 'Agent' })
-        .getAttribute('aria-expanded')
-    ).toBe('false')
-  );
+  await choose('Agent', target === 'model' ? /^Macro/ : /^Researcher/);
+  if (target !== 'agent') await choose('Model', 'Custom model');
 }
 
 function create(): void {

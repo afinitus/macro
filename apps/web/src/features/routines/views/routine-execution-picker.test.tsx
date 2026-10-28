@@ -4,7 +4,6 @@ import {
   render,
   screen,
   waitFor,
-  within,
 } from '@solidjs/testing-library';
 import { type ComponentProps, createResource, createSignal } from 'solid-js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -96,6 +95,7 @@ const external: PersistedAgentLike = {
 function roster(connected = true) {
   return buildAgentRoster({
     agents: [managed, external],
+    macroDefaultModel: 'chat-model',
     runtimes: [{ id: 'workstation', name: 'Workstation', connected }],
     cursorConnected: false,
     cursorNeedsConnection: true,
@@ -129,8 +129,8 @@ function mount(target: RoutineTarget, overrides: Partial<ViewProps> = {}) {
   ));
   return { selection, onChange, onConnect, onCreate };
 }
-function openPicker() {
-  const trigger = screen.getByRole('button', { name: 'Agent' });
+function openPicker(name: 'Agent' | 'Model' = 'Agent') {
+  const trigger = screen.getByRole('button', { name });
   trigger.focus();
   fireEvent.keyDown(trigger, { key: 'Enter' });
   return trigger;
@@ -140,19 +140,6 @@ async function expectClosed(trigger: HTMLElement) {
     expect(trigger.getAttribute('aria-expanded')).toBe('false')
   );
   await waitFor(() => expect(document.activeElement).toBe(trigger));
-}
-async function openModels(name: string) {
-  const trigger = openPicker();
-  const row = screen.getByRole('menuitem', { name: new RegExp(`^${name}`) });
-  row.focus();
-  fireEvent.keyDown(row, { key: 'ArrowRight' });
-  // The root Macro catalog also has a search box; wait for the agent submenu.
-  const menu = await screen.findByRole('menu', {
-    name: new RegExp(`^${name}`),
-  });
-  expect(menu.getAttribute('aria-label')).toBe(`Models for ${name}`);
-  await within(menu).findByRole('textbox', { name: 'Search models' });
-  return { trigger, menu: within(menu) };
 }
 
 let styles: HTMLStyleElement;
@@ -187,7 +174,7 @@ afterEach(() => {
 });
 
 describe('routine execution picker', () => {
-  it('selects Macro models with the keyboard and restores trigger focus', async () => {
+  it('switches to Macro and picks its model with the keyboard, restoring trigger focus', async () => {
     const { selection } = mount({
       kind: 'agent',
       agentId: managedId,
@@ -196,13 +183,21 @@ describe('routine execution picker', () => {
     expect(
       screen.getByRole('group', { name: 'Routine model or agent' })
     ).toBeTruthy();
-    const trigger = openPicker();
+    const agentTrigger = openPicker();
+    const macro = screen.getByRole('menuitem', { name: /^Macro/ });
+    macro.focus();
+    fireEvent.keyDown(macro, { key: 'Enter' });
+    expect(selection()).toEqual({ kind: 'model', model: 'chat-model' });
+    await expectClosed(agentTrigger);
+    expect(agentTrigger.textContent).toContain('Macro');
+    const modelTrigger = openPicker('Model');
     const item = screen.getByRole('menuitem', { name: 'Other model' });
     item.focus();
     fireEvent.keyDown(item, { key: 'Enter' });
     expect(selection()).toEqual({ kind: 'model', model: 'other-model' });
-    await expectClosed(trigger);
-    expect(trigger.textContent).toContain('Other model');
+    await expectClosed(modelTrigger);
+    expect(modelTrigger.textContent).toContain('Other model');
+    expect(agentTrigger.textContent).toContain('Macro');
   });
 
   it.each(['Researcher', 'Local worker'])(
@@ -214,8 +209,9 @@ describe('routine execution picker', () => {
         modelOverride: 'old-model',
       });
       const trigger = openPicker();
-      fireEvent.click(
-        screen.getByRole('menuitem', { name: new RegExp(`^${name}`) })
+      fireEvent.keyDown(
+        screen.getByRole('menuitem', { name: new RegExp(`^${name}`) }),
+        { key: 'Enter' }
       );
       expect(selection()).toEqual({
         kind: 'agent',
@@ -230,11 +226,18 @@ describe('routine execution picker', () => {
     ['Researcher', managedId, 'Other model', 'other-model'],
     ['Local worker', externalId, 'Custom model', 'vendor/custom-model'],
   ])(
-    'selects runtime-specific nested models for %s',
+    'chooses %s, then a model from its runtime in the Model control',
     async (name, agentId, label, model) => {
       const { selection } = mount({ kind: 'model', model: 'chat-model' });
-      const { trigger, menu } = await openModels(name);
-      const item = menu.getByRole('menuitem', { name: label });
+      const agentTrigger = openPicker();
+      fireEvent.keyDown(
+        screen.getByRole('menuitem', { name: new RegExp(`^${name}`) }),
+        { key: 'Enter' }
+      );
+      expect(selection()).toEqual({ kind: 'agent', agentId });
+      await expectClosed(agentTrigger);
+      const modelTrigger = openPicker('Model');
+      const item = screen.getByRole('menuitem', { name: label });
       item.focus();
       fireEvent.keyDown(item, { key: 'Enter' });
       expect(selection()).toEqual({
@@ -242,7 +245,8 @@ describe('routine execution picker', () => {
         agentId,
         modelOverride: model,
       });
-      await expectClosed(trigger);
+      await expectClosed(modelTrigger);
+      expect(agentTrigger.textContent).toContain(name);
     }
   );
 
@@ -303,12 +307,12 @@ describe('routine execution picker', () => {
       }
     );
     const trigger = openPicker();
-    fireEvent.keyDown(screen.getByRole('menuitem', { name: 'Other model' }), {
+    fireEvent.keyDown(screen.getByRole('menuitem', { name: /^Macro/ }), {
       key: 'Enter',
     });
     await expectClosed(trigger);
     setLoading(false);
-    expect(selection()).toEqual({ kind: 'model', model: 'other-model' });
+    expect(selection()).toEqual({ kind: 'model', model: 'chat-model' });
     expect(onChange).toHaveBeenCalledOnce();
   });
 
@@ -344,11 +348,11 @@ describe('routine execution picker', () => {
     { kind: 'model', model: 'retired-model' },
     { kind: 'agent', agentId: externalId, modelOverride: 'retired-model' },
   ] satisfies RoutineTarget[])(
-    'keeps an unavailable model in the trigger with a warning: %j',
+    'keeps an unavailable model in the Model trigger with a warning: %j',
     (target) => {
       const { onChange } = mount(target);
       expect(
-        screen.getByRole('button', { name: 'Agent' }).textContent
+        screen.getByRole('button', { name: 'Model' }).textContent
       ).toContain('Retired Model');
       expect(screen.getByRole('status').textContent).toContain(
         'not available from this runtime'
@@ -408,7 +412,9 @@ describe('routine execution picker', () => {
     fireEvent.input(prompt, { target: { value: 'Keep writing' } });
     expect(screen.getByRole('status').textContent).toContain('Loading models');
     const trigger = openPicker();
-    fireEvent.click(screen.getByRole('menuitem', { name: /Researcher/ }));
+    fireEvent.keyDown(screen.getByRole('menuitem', { name: /^Researcher/ }), {
+      key: 'Enter',
+    });
     await expectClosed(trigger);
     setCatalogs({
       'in-memory': {
