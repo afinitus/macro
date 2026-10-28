@@ -4,6 +4,7 @@ import {
   type ModelRowProps,
 } from '@core/component/AI/component/input/ModelCatalogPicker';
 import { modelLabel } from '@core/component/AI/constant/model-label';
+import { cn } from '@ui';
 import type { Component, JSX } from 'solid-js';
 
 export type ModelChoice = {
@@ -21,6 +22,9 @@ export function ModelSelector(props: {
   disabled?: boolean;
   modelRow?: Component<ModelRowProps>;
   pending?: boolean;
+  /** Show only the model's logo, for phone composers. */
+  compact?: boolean;
+  triggerClass?: string;
   onSelect: (id: string) => void;
   onCloseAutoFocus?: (event: Event) => void;
   children?: JSX.Element;
@@ -38,7 +42,12 @@ export function ModelSelector(props: {
       }))}
       triggerLabel={props.label}
       placeholder={modelLabel(props.model)}
-      triggerClass="h-[33.75px] min-w-0 max-w-full gap-[5.625px] rounded-full border-0 bg-transparent hover:bg-hover px-[7.5px] text-base font-normal text-ink-muted light-mode:text-composer-placeholder [&_svg]:size-[15px]"
+      compact={props.compact}
+      triggerClass={cn(
+        'h-[33.75px] min-w-0 max-w-full gap-[5.625px] rounded-full border-0 bg-transparent hover:bg-hover px-[7.5px] text-base font-normal text-ink-muted light-mode:text-composer-placeholder [&_svg]:size-[15px]',
+        props.compact && 'size-[34px] shrink-0 justify-center p-0',
+        props.triggerClass
+      )}
       ariaLabel="Model"
       placement="top-end"
       disabled={props.disabled}

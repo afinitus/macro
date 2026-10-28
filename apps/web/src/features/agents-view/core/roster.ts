@@ -206,14 +206,20 @@ export function buildAgentRoster(input: RosterInput): RosterAgent[] {
   ];
 }
 
-/** Every agent belongs in the picker; Macro is represented by model choices. */
+/** Every agent belongs in the picker, Macro first; its bot aliases would repeat it. */
 export function rosterForAgentPicker(
   roster: readonly RosterAgent[]
 ): RosterAgent[] {
-  return roster.filter(
-    (agent) =>
-      agent.id !== MACRO_PERSONA_ID && !isMacroAgentId(agent.botId ?? agent.id)
-  );
+  return roster
+    .filter(
+      (agent) =>
+        agent.id === MACRO_PERSONA_ID ||
+        !isMacroAgentId(agent.botId ?? agent.id)
+    )
+    .sort(
+      (a, b) =>
+        Number(b.id === MACRO_PERSONA_ID) - Number(a.id === MACRO_PERSONA_ID)
+    );
 }
 
 /**

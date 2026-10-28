@@ -147,8 +147,9 @@ describe('rosterForAgentPicker and kindForBot', () => {
     ],
   });
 
-  it('includes every runtime and excludes only the built-in Macro identity', () => {
+  it('lists built-in Macro first once and every other runtime after it', () => {
     expect(rosterForAgentPicker(roster).map((a) => a.id)).toEqual([
+      MACRO_PERSONA_ID,
       CURSOR_BOT_ID,
       'bot-in-memory',
       'bot-cursor',
