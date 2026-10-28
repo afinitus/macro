@@ -66,6 +66,8 @@ type MetadataResponse = {
   peers: Array<{
     peer_id: number;
     user_id: string;
+    /** Signed agent actor (`bot|<uuid>`) the peer edited as; null for humans. */
+    actor: string | null;
   }>;
 };
 
@@ -196,7 +198,8 @@ export const syncServiceClient = {
   /**
    * Look up who last edited a given Lexical node and when. `user_id` is a
    * MacroId resolved server-side; `null` if the peer has no recorded user
-   * (anonymous edits or legacy data not yet mirrored locally).
+   * (anonymous edits or legacy data not yet mirrored locally). `actor` is the
+   * signed agent actor (`bot|<uuid>`) the peer edited as, null for humans.
    */
   async getNodeBlame(args: { documentId: string; nodeId: string }) {
     const token = await getPermissionToken('document', args.documentId);
@@ -204,6 +207,7 @@ export const syncServiceClient = {
     const response = await syncFetch<{
       peer_id: string;
       user_id: string | null;
+      actor: string | null;
       timestamp_ms: number;
     }>(`/document/${args.documentId}/blame/${args.nodeId}`, {
       headers: {
@@ -216,10 +220,11 @@ export const syncServiceClient = {
     if (response.isErr()) {
       return err(response.error);
     }
-    const { peer_id, user_id, timestamp_ms } = response.value;
+    const { peer_id, user_id, actor, timestamp_ms } = response.value;
     return ok({
       peerId: peer_id,
       userId: user_id,
+      actor,
       editedAt: new Date(timestamp_ms),
     });
   },
