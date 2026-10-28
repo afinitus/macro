@@ -42,7 +42,9 @@ updates over WebSocket.
   `src/durable_object/surface_migration.rs` if it changes stored shape.
 
 Active-peer queries with `include_ai=false` exclude signed agent actors and the
-legacy reserved AI peer range; Canvas workers use random full-width peer IDs.
+reserved AI peer blocks (`ai_peer.rs`); Canvas workers use random full-width
+peer IDs. `peer_user_map` records each peer's user and agent actor; history and
+blame attribute edits from it, so never reuse an AI peer id.
 
 ## Checks
 
