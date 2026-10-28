@@ -291,7 +291,8 @@ impl<'a> Wsm<'a> {
             // if user is not-anon
             if let Some(user_id) = meta.user_id {
                 let db = self.dss.env.d1(USER_PEER_D1_BINDING)?;
-                insert_user_mapping(db, &user_id, peerid, document_id).await?;
+                insert_user_mapping(db, &user_id, meta.actor.as_deref(), peerid, document_id)
+                    .await?;
             }
         }
         Ok(())
